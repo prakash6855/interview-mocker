@@ -10,16 +10,11 @@ const QuestionAudioPlayer = () => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [timeLeft, setTimeLeft] = useState(120);
   const [isPaused, setIsPaused] = useState(false);
+  const [isStarted, setIsStarted] = useState(false); // New state to track if the user has started
   const timerRef = useRef(null);
   const utteranceRef = useRef(null);
 
-  useEffect(() => {
-    // Check if speechSynthesis is supported
-    if (!("speechSynthesis" in window)) {
-      console.error("Speech synthesis not supported in this browser.");
-      return;
-    }
-
+  const startSpeech = () => {
     // Create a new utterance for the current question
     utteranceRef.current = new SpeechSynthesisUtterance(
       questions[currentQuestionIndex]
@@ -44,13 +39,19 @@ const QuestionAudioPlayer = () => {
         });
       }
     }, 1000);
+  };
+
+  useEffect(() => {
+    if (isStarted) {
+      startSpeech(); // Start speech when the user interacts
+    }
 
     // Cleanup on unmount or when dependencies change
     return () => {
       clearInterval(timerRef.current);
       window.speechSynthesis.cancel();
     };
-  }, [currentQuestionIndex, isPaused]);
+  }, [currentQuestionIndex, isPaused, isStarted]);
 
   const handlePause = () => {
     setIsPaused((prevPaused) => {
@@ -63,14 +64,24 @@ const QuestionAudioPlayer = () => {
     });
   };
 
+  const handleStart = () => {
+    setIsStarted(true);
+  };
+
   return (
     <div>
-      <h1>
-        Question {currentQuestionIndex + 1} of {questions.length}
-      </h1>
-      <p>Time left: {timeLeft} seconds</p>
-      <button onClick={handlePause}>{isPaused ? "Resume" : "Pause"}</button>
-      <p>{isPaused ? "Paused" : "Playing question..."}</p>
+      {!isStarted ? (
+        <button onClick={handleStart}>Start Questions</button>
+      ) : (
+        <>
+          <h1>
+            Question {currentQuestionIndex + 1} of {questions.length}
+          </h1>
+          <p>Time left: {timeLeft} seconds</p>
+          <button onClick={handlePause}>{isPaused ? "Resume" : "Pause"}</button>
+          <p>{isPaused ? "Paused" : "Playing question..."}</p>
+        </>
+      )}
     </div>
   );
 };

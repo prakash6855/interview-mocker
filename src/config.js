@@ -20,4 +20,9 @@ export const config = {
     "Explain CSS Grid.",
     // Add more CSS questions here
   ],
+  behavioral: [
+    "Introduce yourself",
+    "Why should we hire you?",
+    "Where do you see yourselves after 5 years",
+  ],
 };

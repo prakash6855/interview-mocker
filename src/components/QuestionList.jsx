@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import PropTypes from "prop-types";
 
-const DEFAULT_TIMER_DURATION = 30; // Default timer duration (seconds)
+const DEFAULT_TIMER_DURATION = 45; // Default timer duration (seconds)
 
 const QuestionList = ({ questions }) => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);

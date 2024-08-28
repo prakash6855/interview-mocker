@@ -4,12 +4,13 @@ import JavaScriptBehavioral from "./components/JavaScriptBehavioral";
 import ReactTopics from "./components/ReactTopics";
 import HTMLTopics from "./components/HTMLTopics";
 import CSSTopics from "./components/CSSTopics";
+import './App.css'; // Import the CSS file
 
 function App() {
   return (
     <Router>
-      <div>
-        <nav>
+      <div className="container">
+        <nav className="sidebar">
           <ul>
             <li>
               <Link to="/javascript">JavaScript Behavioral</Link>
@@ -25,12 +26,14 @@ function App() {
             </li>
           </ul>
         </nav>
-        <Routes>
-          <Route path="/javascript" element={<JavaScriptBehavioral />} />
-          <Route path="/react" element={<ReactTopics />} />
-          <Route path="/html" element={<HTMLTopics />} />
-          <Route path="/css" element={<CSSTopics />} />
-        </Routes>
+        <main className="content">
+          <Routes>
+            <Route path="/javascript" element={<JavaScriptBehavioral />} />
+            <Route path="/react" element={<ReactTopics />} />
+            <Route path="/html" element={<HTMLTopics />} />
+            <Route path="/css" element={<CSSTopics />} />
+          </Routes>
+        </main>
       </div>
     </Router>
   );

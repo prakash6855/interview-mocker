@@ -1,32 +1,241 @@
-// src/components/QuestionList.jsx
+import { useState, useEffect, useRef } from "react";
 import PropTypes from "prop-types";
-import { useRef } from "react";
 
 const QuestionList = ({ questions }) => {
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [timerDuration, setTimerDuration] = useState(60); // Default timer duration (seconds)
+  const [timeLeft, setTimeLeft] = useState(timerDuration);
   const utteranceRef = useRef(null);
+  const timerRef = useRef(null);
 
-  const playAudio = (index) => {
-    // Cancel any ongoing speech
+  // Function to play audio for the current question
+  const playAudio = () => {
+    if (!("speechSynthesis" in window)) {
+      console.error("Speech synthesis not supported in this browser.");
+      return;
+    }
+
     if (utteranceRef.current) {
       window.speechSynthesis.cancel();
     }
 
-    // Create and play a new utterance for the selected question
-    utteranceRef.current = new SpeechSynthesisUtterance(questions[index]);
+    utteranceRef.current = new SpeechSynthesisUtterance(
+      questions[currentQuestionIndex]
+    );
+
+    utteranceRef.current.onstart = () => {
+      console.log("Playing audio:", questions[currentQuestionIndex]);
+    };
+
+    utteranceRef.current.onerror = (event) => {
+      console.error("Speech synthesis error:", event.error);
+    };
+
     window.speechSynthesis.speak(utteranceRef.current);
   };
 
+  // Function to start or restart the timer
+  const startTimer = () => {
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+    }
+
+    setTimeLeft(timerDuration);
+
+    timerRef.current = setInterval(() => {
+      setTimeLeft((prevTime) => {
+        if (prevTime <= 1) {
+          setCurrentQuestionIndex((prevIndex) => {
+            const nextIndex = (prevIndex + 1) % questions.length;
+            playAudio(); // Play the new question
+            return nextIndex;
+          });
+          return timerDuration; // Reset the timer
+        }
+        return prevTime - 1;
+      });
+    }, 1000); // 1000 ms = 1 second
+  };
+
+  // Function to handle play/pause toggle
+  const togglePlayPause = () => {
+    if (isPlaying) {
+      clearInterval(timerRef.current);
+      window.speechSynthesis.pause();
+    } else {
+      if (currentQuestionIndex === 0) {
+        playAudio(); // Play the first question immediately when starting
+      }
+      startTimer();
+      window.speechSynthesis.resume();
+    }
+    setIsPlaying(!isPlaying);
+  };
+
+  // Function to handle timer duration change
+  const handleTimerChange = (event) => {
+    const newDuration = Number(event.target.value);
+    setTimerDuration(newDuration);
+    if (isPlaying) {
+      setTimeLeft(newDuration);
+      startTimer(); // Restart timer with new duration if playing
+    }
+  };
+
+  // Function to go to the next question
+  const goToNextQuestion = () => {
+    setCurrentQuestionIndex((prevIndex) => {
+      const nextIndex = (prevIndex + 1) % questions.length;
+      return nextIndex;
+    });
+  };
+
+  // Function to go to the previous question
+  const goToPreviousQuestion = () => {
+    setCurrentQuestionIndex((prevIndex) => {
+      const prevInd = (prevIndex - 1 + questions.length) % questions.length;
+      return prevInd;
+    });
+  };
+
+  // Function to reset the state
+  const handleReset = () => {
+    setCurrentQuestionIndex(0);
+    setIsPlaying(false);
+    setTimeLeft(timerDuration);
+    clearInterval(timerRef.current);
+    window.speechSynthesis.cancel();
+  };
+
+  useEffect(() => {
+    if (isPlaying) {
+      playAudio();
+    }
+  }, [currentQuestionIndex]); // Trigger playAudio when currentQuestionIndex changes
+
+  useEffect(() => {
+    if (isPlaying) {
+      startTimer();
+    }
+
+    return () => {
+      clearInterval(timerRef.current);
+      window.speechSynthesis.cancel();
+    };
+  }, [isPlaying, timerDuration]);
+
+  // Inline styles
+  const containerStyle = {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    padding: "20px",
+    border: "1px solid #ddd",
+    borderRadius: "8px",
+    boxShadow: "0 4px 8px rgba(0,0,0,0.1)",
+    width: "350px",
+    margin: "20px auto",
+  };
+
+  const buttonStyle = {
+    marginTop: "10px",
+    padding: "10px 20px",
+    fontSize: "16px",
+    color: "#fff",
+    backgroundColor: "#007bff",
+    border: "none",
+    borderRadius: "4px",
+    cursor: "pointer",
+    transition: "background-color 0.3s",
+  };
+
+  const buttonHoverStyle = {
+    ...buttonStyle,
+    backgroundColor: "#0056b3",
+  };
+
+  const played = currentQuestionIndex;
+  const left = questions.length - currentQuestionIndex - 1;
+
   return (
-    <div>
-      <h2>Questions</h2>
-      <ul>
-        {questions.map((question, index) => (
-          <li key={index}>
-            {question}
-            <button onClick={() => playAudio(index)}>Play Audio</button>
-          </li>
-        ))}
-      </ul>
+    <div style={containerStyle}>
+      <div>
+        <h2>Timer: {timeLeft} seconds</h2>
+        <label htmlFor="timerDuration">Timer Duration (seconds): </label>
+        <input
+          id="timerDuration"
+          type="number"
+          value={timerDuration}
+          onChange={handleTimerChange}
+          min="1"
+          style={{ marginBottom: "10px", padding: "5px", width: "100%" }}
+        />
+      </div>
+      <div>
+        <button
+          onClick={togglePlayPause}
+          style={buttonStyle}
+          onMouseOver={(e) =>
+            (e.currentTarget.style.backgroundColor =
+              buttonHoverStyle.backgroundColor)
+          }
+          onMouseOut={(e) =>
+            (e.currentTarget.style.backgroundColor =
+              buttonStyle.backgroundColor)
+          }
+        >
+          {isPlaying ? "Pause" : "Start"}
+        </button>
+        <button
+          onClick={goToPreviousQuestion}
+          style={buttonStyle}
+          onMouseOver={(e) =>
+            (e.currentTarget.style.backgroundColor =
+              buttonHoverStyle.backgroundColor)
+          }
+          onMouseOut={(e) =>
+            (e.currentTarget.style.backgroundColor =
+              buttonStyle.backgroundColor)
+          }
+        >
+          Previous
+        </button>
+        <button
+          onClick={goToNextQuestion}
+          style={buttonStyle}
+          onMouseOver={(e) =>
+            (e.currentTarget.style.backgroundColor =
+              buttonHoverStyle.backgroundColor)
+          }
+          onMouseOut={(e) =>
+            (e.currentTarget.style.backgroundColor =
+              buttonStyle.backgroundColor)
+          }
+        >
+          Next
+        </button>
+        <button
+          onClick={handleReset}
+          style={{ ...buttonStyle, backgroundColor: "#dc3545" }}
+          onMouseOver={(e) =>
+            (e.currentTarget.style.backgroundColor = "#c82333")
+          }
+          onMouseOut={(e) =>
+            (e.currentTarget.style.backgroundColor = "#dc3545")
+          }
+        >
+          Reset
+        </button>
+      </div>
+      <div>
+        <p>
+          Question {currentQuestionIndex + 1} of {questions.length}
+        </p>
+        <p>
+          {played} played, {left} left
+        </p>
+      </div>
     </div>
   );
 };

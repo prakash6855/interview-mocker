@@ -1,13 +1,13 @@
 import { config } from "../config";
 import QuestionList from "./QuestionList";
 
-const JavaScriptBehavioral = () => {
+const JavaScript = () => {
   return (
     <div>
-      <h2>JavaScript Behavioral Questions</h2>
+      <h2>JavaScript Questions</h2>
       <QuestionList questions={config.javascript} />
     </div>
   );
 };
 
-export default JavaScriptBehavioral;
+export default JavaScript;

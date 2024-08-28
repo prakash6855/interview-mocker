@@ -1,10 +1,10 @@
 // src/App.js
 import { BrowserRouter as Router, Route, Routes, Link } from "react-router-dom";
-import JavaScriptBehavioral from "./components/JavaScriptBehavioral";
+import JavaScript from "./components/JavaScript";
 import ReactTopics from "./components/ReactTopics";
 import HTMLTopics from "./components/HTMLTopics";
 import CSSTopics from "./components/CSSTopics";
-import './App.css'; // Import the CSS file
+import "./App.css"; // Import the CSS file
 
 function App() {
   return (
@@ -13,7 +13,7 @@ function App() {
         <nav className="sidebar">
           <ul>
             <li>
-              <Link to="/javascript">JavaScript Behavioral</Link>
+              <Link to="/javascript">JavaScript</Link>
             </li>
             <li>
               <Link to="/react">React Topics</Link>
@@ -28,7 +28,7 @@ function App() {
         </nav>
         <main className="content">
           <Routes>
-            <Route path="/javascript" element={<JavaScriptBehavioral />} />
+            <Route path="/javascript" element={<JavaScript />} />
             <Route path="/react" element={<ReactTopics />} />
             <Route path="/html" element={<HTMLTopics />} />
             <Route path="/css" element={<CSSTopics />} />

@@ -1,10 +1,12 @@
 import { useState, useEffect, useRef } from "react";
 import PropTypes from "prop-types";
 
+const DEFAULT_TIMER_DURATION = 30; // Default timer duration (seconds)
+
 const QuestionList = ({ questions }) => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [timerDuration, setTimerDuration] = useState(30); // Default timer duration (seconds)
+  const [timerDuration, setTimerDuration] = useState(DEFAULT_TIMER_DURATION);
   const [timeLeft, setTimeLeft] = useState(timerDuration);
   const utteranceRef = useRef(null);
   const timerRef = useRef(null);
@@ -88,23 +90,34 @@ const QuestionList = ({ questions }) => {
   const goToNextQuestion = () => {
     setCurrentQuestionIndex((prevIndex) => {
       const nextIndex = (prevIndex + 1) % questions.length;
+      playAudio(); // Play the new question
       return nextIndex;
     });
+    setTimerDuration(DEFAULT_TIMER_DURATION); // Reset timer duration to default
+    if (isPlaying) {
+      startTimer(); // Restart timer with default duration
+    }
   };
 
   // Function to go to the previous question
   const goToPreviousQuestion = () => {
     setCurrentQuestionIndex((prevIndex) => {
       const prevInd = (prevIndex - 1 + questions.length) % questions.length;
+      playAudio(); // Play the new question
       return prevInd;
     });
+    setTimerDuration(DEFAULT_TIMER_DURATION); // Reset timer duration to default
+    if (isPlaying) {
+      startTimer(); // Restart timer with default duration
+    }
   };
 
   // Function to reset the state
   const handleReset = () => {
     setCurrentQuestionIndex(0);
     setIsPlaying(false);
-    setTimeLeft(timerDuration);
+    setTimerDuration(DEFAULT_TIMER_DURATION);
+    setTimeLeft(DEFAULT_TIMER_DURATION);
     clearInterval(timerRef.current);
     window.speechSynthesis.cancel();
   };

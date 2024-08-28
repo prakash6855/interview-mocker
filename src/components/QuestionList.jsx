@@ -4,7 +4,7 @@ import PropTypes from "prop-types";
 const QuestionList = ({ questions }) => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [timerDuration, setTimerDuration] = useState(60); // Default timer duration (seconds)
+  const [timerDuration, setTimerDuration] = useState(30); // Default timer duration (seconds)
   const [timeLeft, setTimeLeft] = useState(timerDuration);
   const utteranceRef = useRef(null);
   const timerRef = useRef(null);
@@ -16,7 +16,8 @@ const QuestionList = ({ questions }) => {
       return;
     }
 
-    if (utteranceRef.current) {
+    // Cancel any ongoing speech synthesis
+    if (window.speechSynthesis.speaking) {
       window.speechSynthesis.cancel();
     }
 
@@ -112,7 +113,7 @@ const QuestionList = ({ questions }) => {
     if (isPlaying) {
       playAudio();
     }
-  }, [currentQuestionIndex]); // Trigger playAudio when currentQuestionIndex changes
+  }, [currentQuestionIndex, isPlaying]); // Trigger playAudio when currentQuestionIndex or isPlaying changes
 
   useEffect(() => {
     if (isPlaying) {
